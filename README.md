@@ -2,6 +2,8 @@
 #### Este proyecto solo cumple con las bases para poder realizar la entrega.
 #### Agradecimientos a esta libreria que permite el broker de MQTT.
 
+Se tuvo que realizar un fork ya que no existe en el package manager de arduino.
+
 Favor abrir el archivo src/src.ino para revisar el codigo
 
 ---
