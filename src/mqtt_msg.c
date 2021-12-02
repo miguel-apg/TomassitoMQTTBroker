@@ -35,7 +35,7 @@
 #include "os_type.h"
 
 #include <string.h>
-#include "mqtt/mqtt_msg.h"
+#include "./mqtt/mqtt_msg.h"
 #include "user_config.h"
 
 static int ICACHE_FLASH_ATTR append_string(mqtt_connection_t * connection, const char *string, int len) {

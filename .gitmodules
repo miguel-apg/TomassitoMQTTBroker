@@ -1,0 +1,3 @@
+[submodule "src/Tomassito"]
+	path = src/Tomassito
+	url = https://github.com/miguel-apg/Tomassito.git

@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<link href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900" rel="stylesheet">
+	<link href="https://cdn.jsdelivr.net/npm/@mdi/font@6.x/css/materialdesignicons.min.css" rel="stylesheet">
+	<link href="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.min.css" rel="stylesheet">
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui">
+	<style>
+		.noselect {
+			-webkit-touch-callout: none;
+			/* iOS Safari */
+			-webkit-user-select: none;
+			/* Safari */
+			-khtml-user-select: none;
+			/* Konqueror HTML */
+			-moz-user-select: none;
+			/* Old versions of Firefox */
+			-ms-user-select: none;
+			/* Internet Explorer/Edge */
+			user-select: none;
+			/* Non-prefixed version, currently supported by Chrome, Edge, Opera and Firefox */
+		}
+		h1, h2{
+			text-align: center;		
+		}
+	</style>
+</head>
+
+<body>
+	<div id="app">
+		<v-app>
+			<v-main>
+				<v-container>
+					<v-row justify="center">
+						<v-col cols="11">
+							<h1>
+								Sliders Tomasito
+							</h1>
+						</v-col>
+						<v-col cols="5">
+							<v-slider vertical max="1" min="-1" v-model="sliderleft" thumb-label
+								ticks @mouseup="resetLeft()"></v-slider>
+						</v-col>
+						<v-col cols="5">
+							<v-slider color="error" track-color="error" vertical max="1" min="-1"
+								v-model="sliderright" thumb-label ticks @mouseup="resetRight()"></v-slider>
+						</v-col>
+						<v-col cols="10">
+							<h2 style>Motores</h2>
+						</v-col>
+						<v-col class="ma-5 d-flex justify-center" cols="10">
+							<v-chip class="ma-5" color="primary">Izquierdo: {{sliderleft}}</v-chip>
+							<v-chip class="ma-5" color="error">Derecho: {{sliderright}}</v-chip>
+						</v-col>
+					</v-row>
+				</v-container>
+			</v-main>
+		</v-app>
+	</div>
+
+	<script src="https://cdn.jsdelivr.net/npm/vue@2.x/dist/vue.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.js"></script>
+	<script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
+	<script>
+		new Vue({
+			el: "#app",
+			vuetify: new Vuetify(),
+			mounted() {
+				this.createConnection();
+				if(this.client.connected){
+					setInterval(() => {
+						console.log("Left: ", this.sliderleft, " Right: ", this.sliderright);
+					}, 200);
+				}
+			},
+			data() {
+				return {
+					message: "Hola Mundo!!",
+					sliderleft: 0,
+					sliderright: 0,
+					connection: {
+						host: "192.168.1.4",
+						port: 1883,
+						endpoint: "",
+						clean: true, // Reserved session
+						connectTimeout: 4000, // Time out
+						reconnectPeriod: 4000, // Reconnection interval
+						// Certification Information
+						clientId: 'mqttjs_' + Math.random().toString(16).substr(2, 8),
+						username: "",
+						password: "",
+						protocolId: 'MQTT'
+					},
+					subscription: {
+						topic: "tmst/move",
+						qos: 0,
+					},
+					publish: {
+						topic: "topic/move",
+						qos: 0,
+						payload: "0",
+					},
+					receiveNews: "",
+					qosList: [{
+							label: 0,
+							value: 0
+						},
+						{
+							label: 1,
+							value: 1
+						},
+						{
+							label: 2,
+							value: 2
+						},
+					],
+					client: {
+						connected: false,
+					},
+					subscribeSuccess: false,
+				}
+			},
+			methods: {
+				resetLeft() {
+					this.sliderleft = 0;
+				},
+				resetRight() {
+					this.sliderright = 0;
+				},
+				// Create connection
+				createConnection() {
+					const {
+						host,
+						port,
+						endpoint,
+						...options
+					} = this.connection
+					const connectUrl = `wss://${host}:${port}${endpoint}`
+					try {
+						this.client = mqtt.connect(connectUrl, options)
+						console.log(this.client);
+					} catch (error) {
+						console.log("mqtt.connect error", error)
+					}
+					this.client.on("connect", () => {
+						console.log("Connection succeeded!")
+					})
+					this.client.on("error", error => {
+						console.log("Connection failed", error)
+					})
+					this.client.on("message", (topic, message) => {
+						this.receiveNews = this.receiveNews.concat(message)
+						console.log(`Received message ${message} from topic ${topic}`)
+					})
+				},
+			}
+		});
+	</script>
+</body>
+
+</html>
