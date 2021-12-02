@@ -118,8 +118,7 @@ void loop() {
     digitalWrite(MB2, (d >> 6) & 1);    // 01 00 00 00 RBackMode
 
     if(b > 0){
-      tone(buzzer, b); 
-      broker.buzz /= 10;
+      //tone(buzzer, b); 
     }
 
     broker.publish("tmst/distance", distance + "cm");
