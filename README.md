@@ -1,8 +1,10 @@
-# ForK de uMQTTTBroker para poder trabajar con Tomassito como un MQTT Broker.
+# Fork de uMQTTTBroker para poder trabajar con Tomassito como un MQTT Broker.
 #### Este proyecto solo cumple con las bases para poder realizar la entrega.
 #### Agradecimientos a esta libreria que permite el broker de MQTT.
 
+Favor abrir el archivo src/src.ino para revisar el codigo
 
+---
 # uMQTTBroker
 MQTT Broker library for ESP8266 Arduino
 
