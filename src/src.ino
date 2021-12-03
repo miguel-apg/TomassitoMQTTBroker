@@ -4,8 +4,9 @@
 #include <ESP8266HTTPClient.h>
 #include <ESP8266WebServer.h>
 #include <EEPROM.h>
-#include "Cstring.h"
+//#include "Cstring.h"
 #include "myMQTTBroker.h"
+
 
 #define echoPin 14
 #define trigPin 12
@@ -19,6 +20,11 @@ int MA2 = 0;
 int MA1 = 5;
 
 int buzzer = 13;
+
+//Led
+
+int led1 = 15;
+int led2 = 16;
 
 int statusCode;
 const char* ssid = "Default_SSID";
@@ -46,6 +52,12 @@ void setup()
   pinMode(MA1, OUTPUT);
 
   pinMode(buzzer, OUTPUT);
+
+  pinMode(led1 , OUTPUT); 
+  pinMode(led2 , OUTPUT);
+
+  pinMode(trigPin, OUTPUT);
+  pinMode(echoPin, INPUT);
   
   WiFi.disconnect();
   EEPROM.begin(512); //Inicializamos para guardar en EEPROM
@@ -65,7 +77,7 @@ void setup()
   WiFi.begin(esid.c_str(), epass.c_str());
   if (testWifi())
   {
-    launchWeb();
+    //launchWeb();
     broker.init();
     broker.subscribe("#");
     return;
@@ -97,19 +109,43 @@ void distanceGenerator(){
     duration = pulseIn(echoPin, HIGH);
     
     distance = duration * 0.034 / 2;
+    Serial.print("Distance: ");
+    Serial.println(distance);
 }
 
 void loop() {
   if ((WiFi.status() == WL_CONNECTED))
   {
-    server.handleClient();
+    //server.handleClient();
 
     distanceGenerator();
     
     int d = broker.tmst;
-    int b = broker.buzz;
+    //int b = broker.buzz;
     Serial.print("Moving: ");
-    Serial.println(b);
+    Serial.println(d);
+
+    if(distance < 30 ){
+      d = ((1 << 6) | (1 << 4) | (1 << 2) | 1) & d; // Da preferencia a retroceder.
+      Serial.print("Setting to: ");
+      Serial.println(d);
+      digitalWrite(led1, HIGH);
+      digitalWrite(led2, HIGH);
+      tone(buzzer, 500);
+      delay(250);        
+      noTone(buzzer);   
+      delay(250);
+      tone(buzzer, 800);
+      delay(250);        
+      noTone(buzzer);   
+      delay(250);
+      digitalWrite(led1, LOW);
+      digitalWrite(led2, LOW);
+      // 00 00 00 00
+      // && && && &&
+      // 01 01 01 01
+      // 00 00 00 00
+    }
 
     // Aquí va lo bueno:
     digitalWrite(MA1, d & 1);           // 00 00 00 01 Left
@@ -117,11 +153,7 @@ void loop() {
     digitalWrite(MA2, (d >> 4) & 1);    // 00 01 00 00 LBackMode
     digitalWrite(MB2, (d >> 6) & 1);    // 01 00 00 00 RBackMode
 
-    if(b > 0){
-      //tone(buzzer, b); 
-    }
-
-    broker.publish("tmst/distance", distance + "cm");
+    //broker.publish("tmst/distance", distance + "cm");
     
     delay(100);
     
@@ -162,7 +194,7 @@ void launchWeb()
   Serial.println("");
   if (WiFi.status() == WL_CONNECTED)
   {
-    createAltWebServer();
+    //createAltWebServer();
   }
   else{
     createWebServer();
@@ -219,11 +251,12 @@ void setupAP(void)
   Serial.println("over");
 }
 
+/*
 void createAltWebServer(){
     server.on("/", []() {
       server.send(200, "text/html", cstring);
     });
-}
+}*/
 
 void createWebServer()
 {
